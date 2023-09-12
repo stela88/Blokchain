@@ -45,6 +45,14 @@
 </template>
 
 <script>
+import { ethers } from 'ethers';
+import detectEthereumProvider from '@metamask/detect-provider';
+import DonationCampaign from '../services/DonationCampaign.json';
+
+let provider; 
+let signer; 
+let contract; // Smart contract instance
+const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export default {
   data() {
     return {
@@ -66,7 +74,35 @@ export default {
         message: "",
       };
     },
+    async connectWallet() {
+			try {
+				const ethereum = await detectEthereumProvider();
+
+				if (ethereum) {
+					provider = new ethers.providers.Web3Provider(ethereum);
+					signer = provider.getSigner();
+
+					// Ensure the user is connected to their wallet
+					await ethereum.request({ method: 'eth_requestAccounts' });
+
+					// Initialize the contract with the signer
+					contract = new ethers.Contract(contractAddress, DonationCampaign.abi, signer);
+
+				} else {
+					throw new Error(
+						'Ethereum provider not detected. Please install MetaMask or another compatible wallet.'
+					);
+				}
+			} catch (error) {
+				// Handle errors, e.g., display an error message
+				console.error('Error connecting wallet:', error);
+			}
+		},
   },
+  async mounted() {
+		// Call the connectWallet method to initialize Ethereum connection
+		await this.connectWallet();
+	},
 };
 </script>
 
