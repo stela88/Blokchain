@@ -70,19 +70,17 @@ export default {
 
 
 <style>
-/* Postavite veličinu slika */
 img {
-  width: 600px; /* Promijenite veličinu prema potrebama */
-  height: 450px; /* Promijenite veličinu prema potrebama */
+  width: 600px;
+  height: 450px; 
 }
 
-/* Stilizirajte tekst */
 p {
-  font-family: Arial, sans-serif; /* Odaberite font prema potrebama */
-  font-size: 16px; /* Promijenite veličinu fonta prema potrebama */
-  color: #333; /* Promijenite boju teksta prema potrebama */
-  text-align: center; /* Centriraj tekst */
-  padding-left: 440px; /* Dodaj padding sa svih strana */
+  font-family: Arial, sans-serif;
+  font-size: 16px; 
+  color: #333; 
+  text-align: center;
+  padding-left: 440px; 
   padding-right: 440px;
   margin: 10px 0;
 }
