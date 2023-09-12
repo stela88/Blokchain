@@ -1,13 +1,14 @@
 <template>
   <div class="container">
     <h1>Donacije za zaštitu životinja</h1>
-    <form class="donation-form" @submit.prevent="submitForm">
+    <div class="donation">
       <div class="form-group">
         <label for="fullName">Ime i prezime:</label>
         <input
           type="text"
           id="fullName"
-          v-model="donationData.fullName"
+          name="fullName"
+          v-model="fullName"
           required
         />
       </div>
@@ -16,13 +17,14 @@
         <input
           type="number"
           id="donationAmount"
-          v-model="donationData.donationAmount"
+          name="donationAmount"
+          v-model="donationAmount"
           required
         />
       </div>
       <div class="form-group">
         <label for="organization">Odaberite udrugu:</label>
-        <select id="organization" v-model="donationData.organization" required>
+        <select id="organization" name="organization" v-model="organization" required>
           <option value="Udruga 1">SNOOPY</option>
           <option value="Udruga 2">Udruga Fido</option>
           <option value="Udruga 3">Društvo za zaštitu životinja Rijeka</option>
@@ -35,12 +37,14 @@
         <label for="message">Poruka za životinje:</label>
         <textarea
           id="message"
-          v-model="donationData.message"
+          name="message"
+          v-model="message"
           required
         ></textarea>
       </div>
-      <button type="submit">Doniraj</button>
-    </form>
+      <button class="button" @click="Donation()">Doniraj</button>
+			<p id="error"></p>
+    </div>
   </div>
 </template>
 
@@ -51,29 +55,18 @@ import DonationCampaign from '../services/DonationCampaign.json';
 
 let provider; 
 let signer; 
-let contract; // Smart contract instance
+let contract; 
 const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export default {
   data() {
     return {
-      donationData: {
         fullName: "",
         donationAmount: null,
         organization: "",
-        message: "",
-      },
+        message: ""
     };
   },
   methods: {
-    submitForm() {
-      console.log(this.donationData);
-      this.donationData = {
-        fullName: "",
-        donationAmount: null,
-        organization: "",
-        message: "",
-      };
-    },
     async connectWallet() {
 			try {
 				const ethereum = await detectEthereumProvider();
@@ -97,9 +90,37 @@ export default {
 				// Handle errors, e.g., display an error message
 				console.error('Error connecting wallet:', error);
 			}
-		},
+	},
+    async Donation() {
+			try {
+				const fullName = this.fullName;
+				const donationAmount = this.donationAmount;
+				const organization = this.organization;
+				const message = this.message;
+
+				// Ensure signer is connected and has a valid Ethereum address
+				if (!signer || !signer.getAddress()) {
+					throw new Error('Please connect to your Ethereum wallet (e.g., MetaMask).');
+				}
+
+				// Initialize the contract with the signer
+				contract = new ethers.Contract(contractAddress, DonationCampaign.abi, signer);
+
+				// Make the contract call to add a pet
+				const tx = await contract.Donation(fullName, donationAmount, organization, message);
+				await tx.wait();
+
+				// Handle success or show a confirmation message
+				console.log('Donation added successfully!');
+				document.getElementById('error').innerHTML = '';
+				alert('Donation added successfully!');
+			} catch (error) {
+				// Handle errors, e.g., display an error message
+				console.error('Error adding donation:', error);
+			}
+    },
   },
-  async mounted() {
+    async mounted() {
 		// Call the connectWallet method to initialize Ethereum connection
 		await this.connectWallet();
 	},
