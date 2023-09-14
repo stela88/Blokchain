@@ -63,7 +63,7 @@ export default {
       donationAmount: null,
       organization: "", 
       message: "",
-      contractAddress: "", // Dodali smo contractAddress u data
+      contractAddress: "", 
       accountSelections: {
         "1": "0x1Fc78A4113F50034Bd4C179993cBC70DC8EF45FB",
         "2": "0x37f05EFd4B303642886a4bB3F16C1816E2B2DC63",
@@ -82,11 +82,7 @@ export default {
         if (ethereum) {
           provider = new ethers.providers.Web3Provider(ethereum);
           signer = provider.getSigner();
-
-          // Ensure the user is connected to their wallet
           await ethereum.request({ method: 'eth_requestAccounts' });
-
-          // Initialize the contract with the signer
           contract = new ethers.Contract(this.contractAddress, DonationCampaign.abi, signer);
         } else {
           throw new Error(
@@ -94,7 +90,6 @@ export default {
           );
         }
       } catch (error) {
-        // Handle errors, e.g., display an error message
         console.error('Error connecting wallet:', error);
       }
     },
@@ -102,11 +97,9 @@ export default {
     async Donation() {
   try {
     const fullName = this.fullName;
-    const donationAmount = ethers.utils.parseEther(this.donationAmount.toString()); // Pretvara iznos donacije u Wei
+    const donationAmount = ethers.utils.parseEther(this.donationAmount.toString());
     const organization = parseInt(this.organization);
     const message = this.message;
-
-    // Dobijte odabranu adresu za udrugu
     const selectedOrganizationAddress = this.accountSelections[organization];
 
     if (!selectedOrganizationAddress) {
@@ -117,12 +110,10 @@ export default {
       throw new Error('Please connect to your Ethereum wallet (e.g., MetaMask).');
     }
 
-    // Postavite contractAddress na odabranu adresu za udrugu
     this.contractAddress = selectedOrganizationAddress;
 
     contract = new ethers.Contract(this.contractAddress, DonationCampaign.abi, signer);
 
-    // Ovdje ne dodajete ETH u funkciju donate, već ga jednostavno šaljete na adresu ugovora
     const tx = await signer.sendTransaction({
       to: this.contractAddress,
       value: donationAmount
