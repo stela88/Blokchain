@@ -100,7 +100,7 @@ export default {
     async Donation() {
   try {
     const fullName = this.fullName;
-    const donationAmount = ethers.utils.parseEther(this.donationAmount);
+    const donationAmount = ethers.utils.parseEther(this.donationAmount.toString());
     const organization = parseInt(this.organization);
     const message = this.message;
 

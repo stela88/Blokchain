@@ -32,55 +32,51 @@ contract DonationCampaign {
         owner = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
-    function donate(
-        string memory _fullName,
-        uint256 _donationAmount,
-        uint8 _organizationIndex,
-        string memory _message
-    ) public {
-        require(_donationAmount > 0, "Donation amount must be greater than 0");
-        require(
-            _organizationIndex >= 1 && _organizationIndex <= 5,
-            "Invalid organization index"
-        );
+    function donate (
+    string memory _fullName,
+    uint8 _organizationIndex,
+    string memory _message
+) public payable {
+    require(msg.value > 0, "Donation amount must be greater than 0");
+    require(_organizationIndex >= 1 && _organizationIndex <= 5, "Invalid organization index");
 
-        address selectedOrganization;
+    address payable selectedOrganization;
 
-        if (_organizationIndex == 1) {
-            selectedOrganization = udruga1Address;
-        } else if (_organizationIndex == 2) {
-            selectedOrganization = udruga2Address;
-        } else if (_organizationIndex == 3) {
-            selectedOrganization = udruga3Address;
-        } else if (_organizationIndex == 4) {
-            selectedOrganization = udruga4Address;
-        } else if (_organizationIndex == 5) {
-            selectedOrganization = udruga5Address;
-        }
+    if (_organizationIndex == 1) {
+        selectedOrganization = payable(udruga1Address);
+    } else if (_organizationIndex == 2) {
+        selectedOrganization = payable(udruga2Address);
+    } else if (_organizationIndex == 3) {
+        selectedOrganization = payable(udruga3Address);
+    } else if (_organizationIndex == 4) {
+        selectedOrganization = payable(udruga4Address);
+    } else if (_organizationIndex == 5) {
+        selectedOrganization = payable(udruga5Address);
+    }
 
-        require(
-            selectedOrganization != address(0),
-            "Organization address not set"
-        );
+    require(selectedOrganization != address(0), "Organization address not set");
 
-        payable(selectedOrganization).transfer(_donationAmount);
+    selectedOrganization.transfer(msg.value);
 
-        donations.push(
-            Donation(
-                owner,
-                _fullName,
-                _donationAmount,
-                selectedOrganization,
-                _message
-            )
-        );
-        emit DonationReceived(
-            owner,
+    donations.push(
+        Donation(
+            msg.sender,
             _fullName,
-            _donationAmount,
+            msg.value,
             selectedOrganization,
             _message
-        );
+        )
+    );
+
+    emit DonationReceived(
+        msg.sender,
+        _fullName,
+        msg.value,
+        selectedOrganization,
+        _message
+    );
+}
+
     }
 
     function getTotalDonations() public view returns (uint256) {
