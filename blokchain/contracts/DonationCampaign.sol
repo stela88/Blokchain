@@ -32,51 +32,84 @@ contract DonationCampaign {
         owner = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
-    function donate (
-    string memory _fullName,
-    uint8 _organizationIndex,
-    string memory _message
-) public payable {
-    require(msg.value > 0, "Donation amount must be greater than 0");
-    require(_organizationIndex >= 1 && _organizationIndex <= 5, "Invalid organization index");
+    function donate(
+        string memory _fullName,
+        uint8 _organizationIndex,
+        string memory _message
+    ) public payable {
+        require(msg.value > 0, "Donation amount must be greater than 0");
+        require(
+            _organizationIndex >= 1 && _organizationIndex <= 5,
+            "Invalid organization index"
+        );
 
-    address payable selectedOrganization;
+        address payable selectedOrganization;
 
-    if (_organizationIndex == 1) {
-        selectedOrganization = payable(udruga1Address);
-    } else if (_organizationIndex == 2) {
-        selectedOrganization = payable(udruga2Address);
-    } else if (_organizationIndex == 3) {
-        selectedOrganization = payable(udruga3Address);
-    } else if (_organizationIndex == 4) {
-        selectedOrganization = payable(udruga4Address);
-    } else if (_organizationIndex == 5) {
-        selectedOrganization = payable(udruga5Address);
-    }
+        if (_organizationIndex == 1) {
+            selectedOrganization = payable(udruga1Address);
+        } else if (_organizationIndex == 2) {
+            selectedOrganization = payable(udruga2Address);
+        } else if (_organizationIndex == 3) {
+            selectedOrganization = payable(udruga3Address);
+        } else if (_organizationIndex == 4) {
+            selectedOrganization = payable(udruga4Address);
+        } else if (_organizationIndex == 5) {
+            selectedOrganization = payable(udruga5Address);
+        }
 
-    require(selectedOrganization != address(0), "Organization address not set");
+        require(
+            selectedOrganization != address(0),
+            "Organization address not set"
+        );
 
-    selectedOrganization.transfer(msg.value);
+        selectedOrganization.transfer(msg.value);
 
-    donations.push(
-        Donation(
+        donations.push(
+            Donation(
+                msg.sender,
+                _fullName,
+                msg.value,
+                selectedOrganization,
+                _message
+            )
+        );
+
+        emit DonationReceived(
             msg.sender,
             _fullName,
             msg.value,
             selectedOrganization,
             _message
-        )
-    );
+        );
+    }
 
-    emit DonationReceived(
-        msg.sender,
-        _fullName,
-        msg.value,
-        selectedOrganization,
-        _message
-    );
-}
+    function sendEthToOrganization(uint8 _organizationIndex) public payable {
+        require(msg.value > 0, "Amount must be greater than 0");
+        require(
+            _organizationIndex >= 1 && _organizationIndex <= 5,
+            "Invalid organization index"
+        );
 
+        address payable selectedOrganization;
+
+        if (_organizationIndex == 1) {
+            selectedOrganization = payable(udruga1Address);
+        } else if (_organizationIndex == 2) {
+            selectedOrganization = payable(udruga2Address);
+        } else if (_organizationIndex == 3) {
+            selectedOrganization = payable(udruga3Address);
+        } else if (_organizationIndex == 4) {
+            selectedOrganization = payable(udruga4Address);
+        } else if (_organizationIndex == 5) {
+            selectedOrganization = payable(udruga5Address);
+        }
+
+        require(
+            selectedOrganization != address(0),
+            "Organization address not set"
+        );
+
+        selectedOrganization.transfer(msg.value);
     }
 
     function getTotalDonations() public view returns (uint256) {

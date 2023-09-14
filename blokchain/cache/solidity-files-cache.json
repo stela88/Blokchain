@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\korisnik\\Documents\\GitHub\\Blokchain\\blokchain\\contracts\\DonationCampaign.sol": {
-      "lastModificationDate": 1694689935422,
-      "contentHash": "06b0ff4f7e6f0aaed09c410213dd14a9",
+      "lastModificationDate": 1694703222282,
+      "contentHash": "afd9115049b3c7aacf7794fbfd25aedc",
       "sourceName": "contracts/DonationCampaign.sol",
       "solcConfig": {
         "version": "0.8.18",
