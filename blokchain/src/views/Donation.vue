@@ -13,7 +13,7 @@
         />
       </div>
       <div class="form-group">
-        <label for="donationAmount">Donacija:</label>
+        <label for="donationAmount">Donacija (ETH):</label>
         <input
           type="number"
           id="donationAmount"
@@ -25,12 +25,11 @@
       <div class="form-group">
         <label for="organization">Odaberite udrugu:</label>
         <select id="organization" name="organization" v-model="organization" required>
-          <option value="Udruga 1">SNOOPY</option>
-          <option value="Udruga 2">Udruga Fido</option>
-          <option value="Udruga 3">Društvo za zaštitu životinja Rijeka</option>
-          <option value="Udruga 4">Lunjo i Maza </option>
-          <option value="Udruga 5">DRUGA PRILIKA</option>
-
+          <option value="1">SNOOPY</option>
+          <option value="2">Udruga Fido</option>
+          <option value="3">Društvo za zaštitu životinja Rijeka</option>
+          <option value="4">Lunjo i Maza</option>
+          <option value="5">DRUGA PRILIKA</option>
         </select>
       </div>
       <div class="form-group">
@@ -56,16 +55,23 @@ import DonationCampaign from '../services/DonationCampaign.json';
 let provider; 
 let signer; 
 let contract; 
-const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 export default {
   data() {
-    return {
-        fullName: "",
-        donationAmount: null,
-        organization: "",
-        message: ""
-    };
-  },
+  return {
+    fullName: "",
+    donationAmount: null,
+    organization: "", 
+    message: "",
+    accountSelections: {
+      "1": "0x1Fc78A4113F50034Bd4C179993cBC70DC8EF45FB",
+      "2": "0x37f05EFd4B303642886a4bB3F16C1816E2B2DC63",
+      "3": "0xc6E40510b71806dbf957d154dCF7617A3C584D3e",
+      "4": "0x1D8565320289E1a257c7F8dC42e94a1Bf08b4475",
+      "5": "0x24805813DDB39ae1154aFe8Fae71F1816E6c74cC"
+    }
+  };
+},
+
   methods: {
     async connectWallet() {
 			try {
@@ -79,7 +85,7 @@ export default {
 					await ethereum.request({ method: 'eth_requestAccounts' });
 
 					// Initialize the contract with the signer
-					contract = new ethers.Contract(contractAddress, DonationCampaign.abi, signer);
+					contract = new ethers.Contract(contractAddress, DonationCampaign.abi);
 
 				} else {
 					throw new Error(
@@ -92,36 +98,34 @@ export default {
 			}
 	},
     async Donation() {
-			try {
-				const fullName = this.fullName;
-				const donationAmount = this.donationAmount;
-				const organization = this.organization;
-				const message = this.message;
+  try {
+    const fullName = this.fullName;
+    const donationAmount = ethers.utils.parseEther(this.donationAmount);
+    const organization = parseInt(this.organization);
+    const message = this.message;
 
-				// Ensure signer is connected and has a valid Ethereum address
-				if (!signer || !signer.getAddress()) {
-					throw new Error('Please connect to your Ethereum wallet (e.g., MetaMask).');
-				}
+    // Dobijte odabranu adresu za udrugu
+    const contractAddress = this.accountSelections[organization];
 
-				// Initialize the contract with the signer
-				contract = new ethers.Contract(contractAddress, DonationCampaign.abi, signer);
+    if (!signer || !signer.getAddress()) {
+      throw new Error('Please connect to your Ethereum wallet (e.g., MetaMask).');
+    }
 
-				// Make the contract call to add a pet
-				const tx = await contract.Donation(fullName, donationAmount, organization, message);
-				await tx.wait();
+    contract = new ethers.Contract(contractAddress, DonationCampaign.abi, signer);
+    const tx = await contract.donate(fullName, donationAmount, organization, message);
+    await tx.wait();
 
-				// Handle success or show a confirmation message
-				console.log('Donation added successfully!');
-				document.getElementById('error').innerHTML = '';
-				alert('Donation added successfully!');
-			} catch (error) {
-				// Handle errors, e.g., display an error message
-				console.error('Error adding donation:', error);
-			}
-    },
+    console.log('Donation added successfully!');
+    document.getElementById('error').innerHTML = '';
+    alert('Donation added successfully!');
+  } catch (error) {
+    console.error('Error adding donation:', error);
+  }
+},
+
   },
     async mounted() {
-		// Call the connectWallet method to initialize Ethereum connection
+
 		await this.connectWallet();
 	},
 };
